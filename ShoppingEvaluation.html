@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="./font/iconfont.css">
+    <style>
+        .clearfix:after {
+            content: "";
+            display: block;
+            visibility: hidden;
+            height: 0;
+            clear: both;
+        }
+        .box{
+            width: 320px;
+            height: 540px;
+            border: 1px solid #ccc;
+            box-shadow: 1px 1px 1px 1px #e0dddd;
+            border-radius: 10px;
+        }
+       .box .box-warp{
+          padding: 0px 10px;
+       }
+        .box .title{
+            text-align: center;
+            padding: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .box .box-warp .evaluate-box{
+            width: 300px;
+            height: 128px;
+            background: rgba(245,240,240,.6);
+            border-radius: 10px;
+        }
+        .box .box-warp .evaluate{
+           
+           
+        }
+        .box .box-warp .evaluate .text{
+            float: left;
+            padding: 10px;
+        }
+        .box .box-warp .evaluate .icon{
+            float: left;
+            padding: 10px 10px 10px 0px;
+            
+        }
+        .box .box-warp .evaluate .icon i{
+            font-size: 20px;
+            padding: 0px 6px;
+            cursor: pointer;
+
+        }
+        .box .box-warp .ipt{
+            margin-top: 20px;
+        }
+        .box .box-warp .ipt textarea{
+            outline: none;
+            padding: 10px;
+            border-radius: 10px;
+            resize: none;
+        }
+        .box .box-warp .btn{
+            margin-top: 20px;
+            width: 300px;
+            height: 26px;
+            line-height: 26px;
+            text-align: center;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            background: yellowgreen;
+        }
+        .activate{
+            color: #ecec12;
+        }
+        .box .box-bottom{
+            margin-top: 20px;
+            width: 300px;
+            height: 160px;
+            background: #f9f6f6;
+            padding: 10px 10px;
+            font-size: 12px;
+        }
+        .box .box-bottom .box-text{
+            font-size: 14px;        
+        }
+        .box .box-bottom .box-text .getStars{
+            margin-bottom: 4px;
+        }
+        .box .box-bottom .del{
+            float: right;
+            width: 40px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            border-radius: 4px;
+            background: #e4393c;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- 视图 V views -->
+    <div id='app'>
+        <div class="box">
+            <div class="box-warp">
+                <div class="title">购物评价</div>
+                <div class="evaluate-box">  
+                    <div class="evaluate" v-for='(item,i) in evaluateList' :key='i'>
+                        <div class="text">{{item.title}}</div>
+                        <div class="icon"><i class="iconfont icon-shixinxingxing"   v-for="(itme,k) in stars" :key='k' :class='{activate:itme.isHas}' @click='light(k)'></i></div>
+                    </div>
+                </div>
+                <div class="ipt">
+                    <textarea placeholder="商品评价" cols="36" rows="4" v-model='msg'></textarea>
+                </div>
+                <div class="btn" @click='btn'>提交</div>
+            </div>
+        <!-- 评价 -->
+            <div class="box-bottom" v-for='(item,k) in msglist'>
+                <div class="box-text">
+                    <div v-for='(item,k) in evaluateList' class="getStars"><span>{{item.title}}：</span><span>{{starsNum}}星</span> </div>
+                </div>
+                <div class="time-box">
+                    <div class="time">日期：{{time|timeFormt}}</div>
+                    <div>评价：{{item.assess}}</div>
+                </div>
+                <div class="del" @click='del(k)'>删除</div>
+            </div>
+        
+        </div>
+    </div>
+    
+    <!-- 调度者 MV ViewModel  -->
+    <script src='./vue.js'></script>
+    
+    
+    <!-- 模型 M Model -->
+    <script>
+        //过滤时间
+        Vue.filter('timeFormt',(v)=>{
+             //时间
+            var dd =new Date(v);
+
+            var y=dd.getFullYear();
+            var m=dd.getMonth()+1;
+            var d=dd.getDate();
+                    
+            var h=dd.getHours();
+            var mm=dd.getMinutes();
+            var s=dd.getSeconds();
+
+            return `${y}-${m}-${d}-${h}:${mm}:${s}`;
+
+        })
+
+        var vm = new Vue({
+            el:'#app',
+            data:{  
+                stars:[
+                    {num:1,isHas:false},
+                    {num:2,isHas:false},
+                    {num:3,isHas:false},
+                    {num:4,isHas:false},
+                    {num:5,isHas:false}
+                ],
+                evaluateList:[
+                    {title:'物流速度'},
+                    {title:'客服服务'},
+                    {title:'商品质量'},
+                ],
+                starsNum:0, 
+                msg:'' ,
+                msglist:[],
+                time:new Date(),
+            },
+            methods:{
+                light(k){
+                   //星星总数
+                   let total = this.stars.length;
+                    // 点击的是第几颗星
+                   let id =k+1;
+
+                   if(this.starsNum == 0){
+                       this.starsNum =id;
+                       for(let i=0;i<id;i++){
+                           this.stars[i].isHas= true;
+
+                       }
+
+                   }else{
+                       //再次点击取消高亮
+                       if(id==this.starsNum){
+                           for(let i=k;i<total;i++){
+                                this.stars[i].isHas =false;
+                           }
+                       }
+                       //如果小于当前最高星级，则保留当前星级
+                       if(id<this.starsNum){
+                            for(let i =id;i<this.starsNum;i++){
+                                this.stars[i].isHas =false;
+                            }
+                       }
+                       //如果大于当前星级，则直接选择该星级
+                       if(id>this.starsNum){
+                           for(let i =0;i<id;i++){
+                               this.stars[i].isHas =true;
+                           }
+                       }
+                       //计算当前有几颗星星
+                       let count = 0;
+                       for(let i =0 ;i<total;i++){
+                           if(this.stars[i].isHas){
+                                count++;
+                           }
+                       }
+                       this.starsNum = count;
+                   }
+
+                },
+                
+                //提交数据
+                btn(){
+                    //取消星星
+                    for(let i=0;i<this.stars.length;i++){
+                        this.stars[i].isHas= false;
+                    
+                    }
+                    //初始值
+                    // this.starsNum= null;
+                    
+                    this.msglist.push({ assess:this.msg});
+
+                    this.msg ='';
+                },
+                //删除数据
+                del(k){
+                    this.msglist.splice(k,1);
+                }
+                
+            },
+        })
+    </script>
+</body>
+</html>
